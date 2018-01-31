@@ -18,14 +18,14 @@ namespace JointTelegramBot.Web.Services.Telegram
             _log = log;
             _telegramMessageRecieveService = telegramMessageReceive;
         }
-        
-        //public long ChatId { get; set; }
+
+        public long ChatId { get; set; }
 
         public void StartBot(TelegramConfig config)
         {
             try
             {
-                //ChatId = config.ChatId;
+                ChatId = config.ChatId;
                 var bot = new TelegramBotClient(config.BotToken);
                 _telegramMessageRecieveService.StartReceivingMessages(bot);
             }

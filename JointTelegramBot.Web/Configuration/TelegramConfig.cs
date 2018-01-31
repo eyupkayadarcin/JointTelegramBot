@@ -8,6 +8,6 @@ namespace JointTelegramBot.Web.Configuration
     public class TelegramConfig
     {
         public string BotToken { get; set; }
-        public int ChatId { get; set; }
+        public long ChatId { get; set; }
     }
 }

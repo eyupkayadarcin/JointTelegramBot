@@ -34,14 +34,14 @@ namespace JointTelegramBot.Web.Services.Telegram
         }
         private async void BotOnMessageReceivedAsync(object sender, UpdateEventArgs e)
         {
-            var message = e.Update.Message;
+            var message = e.Update.ChannelPost;
             await _bot.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
             await _bot.SendTextMessageAsync(message.Chat.Id, "Merhaba Deneme Botuna Hoşgeldiniz! /help'ten istediğiniz özelliklere ulaşabilirsiniz");
             if (message.Type != MessageType.TextMessage) return;
             try
             {
                 await CheckMessage(message.Text, message.Chat.Id);
-                await _databaseService.AddUser(e.Update.Message.From.Id, e.Update.Message.From.FirstName, e.Update.Message.From.LastName, e.Update.Message.From.Username);
+                await _databaseService.AddUser(e.Update.ChannelPost.From.Id, e.Update.ChannelPost.From.FirstName, e.Update.ChannelPost.From.LastName, e.Update.ChannelPost.From.Username);
             }
             catch (Exception ex)
             {
