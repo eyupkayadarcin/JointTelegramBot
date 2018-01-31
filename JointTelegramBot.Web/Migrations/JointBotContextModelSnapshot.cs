@@ -37,16 +37,18 @@ namespace JointTelegramBot.Web.Migrations
 
             modelBuilder.Entity("JointTelegramBot.Web.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("FirstName");
 
                     b.Property<string>("LastName");
 
+                    b.Property<int>("UserId");
+
                     b.Property<string>("UserName");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("People");
                 });

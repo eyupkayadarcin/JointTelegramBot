@@ -30,6 +30,7 @@ namespace JointTelegramBot.Web
                 var configurationBuilder = new ConfigurationBuilder();
                 configurationBuilder.SetBasePath(Path.Combine(Directory.GetCurrentDirectory()));
                 configurationBuilder.AddJsonFile("appsettings.json", false, true);
+
                 var config = configurationBuilder.Build();
 
                 Log.Logger = new LoggerConfiguration()
@@ -47,6 +48,7 @@ namespace JointTelegramBot.Web
                         .UseContentRoot(Directory.GetCurrentDirectory())
                         .UseStartup<Startup>()
                         .UseConfiguration(config)
+                        .UseSerilog()
                         .UseUrls(serverUrls)
                         .Build();
 

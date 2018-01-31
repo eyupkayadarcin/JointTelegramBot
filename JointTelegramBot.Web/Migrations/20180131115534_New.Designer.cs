@@ -12,7 +12,7 @@ using System;
 namespace JointTelegramBot.Web.Migrations
 {
     [DbContext(typeof(JointBotContext))]
-    [Migration("20180130113824_New")]
+    [Migration("20180131115534_New")]
     partial class New
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,16 +38,18 @@ namespace JointTelegramBot.Web.Migrations
 
             modelBuilder.Entity("JointTelegramBot.Web.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("FirstName");
 
                     b.Property<string>("LastName");
 
+                    b.Property<int>("UserId");
+
                     b.Property<string>("UserName");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("People");
                 });

@@ -1,8 +1,12 @@
-﻿using JointTelegramBot.Web.Models;
+﻿using JointTelegramBot.Web.Configuration;
+using JointTelegramBot.Web.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,6 +27,9 @@ namespace JointTelegramBot.Web.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<UserStats>().HasIndex(x => x.RefLink).IsUnique();
+            //builder.Entity<User>().Property(x => x.UserId)
+            //   .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
+            base.OnModelCreating(builder);
         }
 
     }
@@ -30,8 +37,14 @@ namespace JointTelegramBot.Web.Data
     {
         public JointBotContext CreateDbContext(string[] args)
         {
+
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
             var builder = new DbContextOptionsBuilder<JointBotContext>();
-            builder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TelegramBot;Trusted_Connection=True;MultipleActiveResultSets=true");
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            builder.UseSqlServer(connectionString);
             return new JointBotContext(builder.Options);
         }
     }

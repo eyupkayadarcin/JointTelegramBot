@@ -21,9 +21,16 @@ namespace JointTelegramBot.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            //Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+        .SetBasePath(env.ContentRootPath)
+        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+        .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -33,36 +40,51 @@ namespace JointTelegramBot.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            //services.AddOptions();
+            //services.Configure<TelegramConfig>(Configuration.GetSection("TelegramConfig"));
+            services.AddSingleton<IConfiguration>(Configuration);
+            
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterInstance(Configuration).As<IConfiguration>().SingleInstance();
 
             var serviceCollection = new ServiceCollection().AddLogging(loggingBuilder =>
                 loggingBuilder.AddSerilog(dispose: true));
 
+            //services.AddDbContext<JointBotContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            serviceCollection.AddDbContextPool<JointBotContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             serviceCollection.BuildServiceProvider();
 
             containerBuilder.Populate(serviceCollection);
 
-            serviceCollection.AddDbContextPool<JointBotContext>(options => options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TelegramBot;Trusted_Connection=True;MultipleActiveResultSets=true"));
-            //services.AddDbContext<JointBotContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+           
 
             containerBuilder.RegisterType<TelegramConfig>().SingleInstance();
+            containerBuilder.RegisterType<GeneralConfig>().SingleInstance();
             containerBuilder.RegisterType<TelegramMessageReceiveService>().SingleInstance();
-            containerBuilder.RegisterType<DatabaseService>().AsSelf();
+            containerBuilder.RegisterType<DatabaseService>().SingleInstance();
             containerBuilder.RegisterType<TelegramBot>().SingleInstance();
             containerBuilder.RegisterType<StartupCheckingService>().SingleInstance();
+            //services.Configure<TelegramConfig>(Configuration.GetSection("Telegram"));
+            //services.AddTransient<DatabaseService>();
+            //services.AddTransient<TelegramMessageReceiveService>();
+            //services.AddTransient<TelegramBot>();
+            //services.AddTransient<StartupCheckingService>();
+
             Container = containerBuilder.Build();
 
             var loggerFactory = Container.Resolve<ILoggerFactory>();
             var log = loggerFactory.CreateLogger<Program>();
-            ConfigureConfig(Container, Configuration,log);
+            ConfigureConfig(Container, Configuration, log);
+
 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime applicationLifetime)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env,IApplicationLifetime applicationLifetime)
         {
-            applicationLifetime.ApplicationStarted.Register(async () => await OnStarting());
+            applicationLifetime.ApplicationStarted.Register(async () => await OnStartingAsync());
 
             if (env.IsDevelopment())
             {
@@ -91,7 +113,7 @@ namespace JointTelegramBot.Web
                 var config = container.Resolve<TelegramConfig>();
                 configuration.GetSection("Telegram").Bind(config);
                 log.LogInformation("Created config");
-                
+
             }
             catch (Exception)
             {
@@ -99,13 +121,27 @@ namespace JointTelegramBot.Web
                 log.LogError("Error in reading telegram config");
                 throw;
             }
+            try
+            {
+                var config = container.Resolve<GeneralConfig>();
+                configuration.GetSection("General").Bind(config);
+                log.LogInformation("Created config general");
+
+            }
+            catch (Exception)
+            {
+
+                log.LogError("Error in reading telegram config");
+                throw;
+            }
+       
         }
 
-        private async Task OnStarting()
+        private async Task OnStartingAsync()
         {
             var startupService = Container.Resolve<StartupCheckingService>();
             var context = Container.Resolve<JointBotContext>();
-            await DbInitializer.Initialize(context);
+            //await DbInitializer.Initialize(context);
 
             startupService.Start();
         }

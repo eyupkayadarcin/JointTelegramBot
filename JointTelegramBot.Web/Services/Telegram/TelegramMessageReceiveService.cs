@@ -1,5 +1,7 @@
 ﻿using JointTelegramBot.Web.Configuration;
+using JointTelegramBot.Web.Services.Data;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +17,15 @@ namespace JointTelegramBot.Web.Services.Telegram
     {
         private static ILogger<TelegramMessageReceiveService> _log;
         private readonly TelegramConfig _config;
+        private readonly DatabaseService _databaseService;
         private TelegramBotClient _bot;
 
-        public TelegramMessageReceiveService(ILogger<TelegramMessageReceiveService> log, TelegramConfig config)
+        public TelegramMessageReceiveService(ILogger<TelegramMessageReceiveService> log,  TelegramConfig options, DatabaseService databaseService)
         {
             _log = log;
-            _config = config;
+            _config = options;
+            _databaseService = databaseService;
+            
         }
 
         public void StartReceivingMessages(TelegramBotClient bot)
@@ -31,10 +36,12 @@ namespace JointTelegramBot.Web.Services.Telegram
         {
             var message = e.Update.Message;
             await _bot.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
+            await _bot.SendTextMessageAsync(message.Chat.Id, "Merhaba Deneme Botuna Hoşgeldiniz! /help'ten istediğiniz özelliklere ulaşabilirsiniz");
             if (message.Type != MessageType.TextMessage) return;
             try
             {
                 await CheckMessage(message.Text, message.Chat.Id);
+                await _databaseService.AddUser(e.Update.Message.From.Id, e.Update.Message.From.FirstName, e.Update.Message.From.LastName, e.Update.Message.From.Username);
             }
             catch (Exception ex)
             {
@@ -47,7 +54,11 @@ namespace JointTelegramBot.Web.Services.Telegram
         private async Task CheckMessage(string text, long id)
         {
             if (text.StartsWith("/start"))
+            {
                 await _bot.SendTextMessageAsync(id, "Start'da yazılacak metin");
+                
+
+            }
 
         }
 

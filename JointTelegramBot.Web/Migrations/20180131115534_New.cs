@@ -13,15 +13,16 @@ namespace JointTelegramBot.Web.Migrations
                 name: "People",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
+                    UserId = table.Column<int>(nullable: false),
                     UserName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_People", x => x.UserId);
+                    table.PrimaryKey("PK_People", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -55,7 +56,7 @@ namespace JointTelegramBot.Web.Migrations
                         name: "FK_Stats_People_UserId",
                         column: x => x.UserId,
                         principalTable: "People",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -77,7 +78,7 @@ namespace JointTelegramBot.Web.Migrations
                         name: "FK_Status_People_UserId",
                         column: x => x.UserId,
                         principalTable: "People",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -97,7 +98,7 @@ namespace JointTelegramBot.Web.Migrations
                         name: "FK_Wallet_People_UserId",
                         column: x => x.UserId,
                         principalTable: "People",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
